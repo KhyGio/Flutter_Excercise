@@ -14,9 +14,34 @@ class _ExpenseFormState extends State<ExpenseForm> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
 
+  String? errorMessage;
+
   void onCheckPressed() {
     String title = _titleController.text;
-    double amount = double.parse(_amountController.text);
+
+    double? amount = double.tryParse(_amountController.text);
+
+    if (amount == null) {
+      setState(() {
+        errorMessage = 'enter the valid number';
+      });
+      return;
+    }
+    // if (amount < 0) {
+    //   setState(() {
+    //     errorMessage = 'enter the number geater than 0';
+    //   });
+    //   return;
+    // }
+    if (amount > 100) {
+      setState(() {
+        errorMessage = 'number cant geater than 100';
+      });
+      return;
+    }
+    setState(() {
+      errorMessage = null;
+    });
 
     Expense newExpense = Expense(
       amount: amount,
@@ -41,40 +66,47 @@ class _ExpenseFormState extends State<ExpenseForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _titleController,
-            maxLength: 50,
-            decoration: const InputDecoration(label: Text('Title')),
-          ),
-
-          SizedBox(height: 20),
-          TextField(
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            controller: _amountController,
-            maxLength: 50,
-            decoration: InputDecoration(
-              prefix: Text("\$"),
-              label: const Text('Amount'),
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _titleController,
+              maxLength: 50,
+              decoration: const InputDecoration(label: Text('Title')),
             ),
-          ),
 
-          Spacer(),
+            SizedBox(height: 20),
+            TextField(
+              keyboardType: TextInputType.text,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+              ],
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(onPressed: onCancelPressed, child: Text("Cancel")),
-              ElevatedButton(onPressed: onCheckPressed, child: Text("Save")),
-            ],
-          ),
-        ],
+              controller: _amountController,
+              maxLength: 50,
+              decoration: InputDecoration(
+                prefix: Text("\$"),
+                label: const Text('Amount'),
+                errorText: errorMessage,
+              ),
+            ),
+
+            Spacer(),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: onCancelPressed,
+                  child: Text("Cancel"),
+                ),
+                ElevatedButton(onPressed: onCheckPressed, child: Text("Save")),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
